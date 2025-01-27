@@ -1,0 +1,20 @@
+{
+    "name": "Attendance Tracker",
+    "description": "Calculate days needed to achieve 75% attendance.",
+    "version": "1.0",
+    "manifest_version": 3,
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": "hey.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://online.nitjsr.ac.in/endsem/StudentAttendance/ClassAttendance.aspx*"
+            ],
+            "js": [
+                "app.js"
+            ]
+        }
+    ]
+}
