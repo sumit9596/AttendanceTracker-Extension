@@ -1,102 +1,96 @@
-// Get The URL
-const site = window.location.hostname
-
-// alert(" The JavaScript has been injected to: " + site + " 🤖")
+const site = window.location.hostname;
+// alert(" The JavaScript has been injected to: " + site + " 🤖");
 
 let count = 0;
-let temp = 0;
+let temp = 1;
 
-document.querySelector('#ContentPlaceHolder1_gv_lblfeedback').innerHTML = "Days needed to reach 75% Attendance"
-
-
-
-function replaceInputWithP(inputId, newText) {
-    // Find the input element by its ID
-    const inputElement = document.getElementById(inputId);
-
-    if (inputElement) {
-        // Create a new <p> element
-        const pElement = document.createElement("p");
-        pElement.textContent = newText || inputElement.value; // Use input value or provided text
-
-        // Replace the input with the new <p> element
-        inputElement.parentNode.replaceChild(pElement, inputElement);
-    } else {
-        console.log(`No element found with id "${inputId}"`);
-    }
+// Check if element exists before modifying it
+let feedbackElement = document.querySelector('#ContentPlaceHolder1_gv_lblfeedback');
+if (feedbackElement) {
+    feedbackElement.innerHTML = "Days needed to reach 75% Attendance";
 }
 
+// Function to replace input with paragraph
+function replaceInputWithP(inputId, newText) {
+    const inputElement = document.getElementById(inputId);
+    if (!inputElement) {
+        console.warn(`No element found with ID: ${inputId}`);
+        return;
+    }
+    const pElement = document.createElement("p");
+    pElement.textContent = newText || inputElement.value;
+    inputElement.parentNode.replaceChild(pElement, inputElement);
+}
 
-
-
-
-
-
-
+// Function to style all paragraphs
 function styleAllParagraphs() {
-    const paragraphs = document.getElementsByTagName('p'); // Get all <p> tags
+    const paragraphs = document.getElementsByTagName('p');
     for (let i = 0; i < paragraphs.length; i++) {
         paragraphs[i].style.color = "red";
         paragraphs[i].style.fontWeight = "bold";
     }
 }
 
+// Function to calculate additional days needed
+function calculateAdditionalDays(totalDays, presentDays) {
+    let requiredAttendance = 0.75 * totalDays;
+    let additionalDays = (requiredAttendance - presentDays) / 0.25;
+    return additionalDays > 0 ? Math.ceil(additionalDays) : 0;
+}
 
+// Loop to process attendance data
+while (true) {
+    let totalClassElement = document.querySelector(`#ContentPlaceHolder1_gv_lbltotalclass_${count}`);
+    if (!totalClassElement || totalClassElement.innerHTML.trim() === "") break;
 
-
-while (1) {
-
-    let a = (document.querySelector(`#ContentPlaceHolder1_gv_lbltotalclass_${count}`).innerHTML);
-
+    let a = totalClassElement.innerHTML;
     let [numerator, denominator] = a.split("/").map(Number);
+    if (isNaN(numerator) || isNaN(denominator)) break;
 
-    function calculateAdditionalDays(totalDays, presentDays) {
-        // Calculate the required attendance to meet 75% target
-        let requiredAttendance = 0.75 * totalDays;
+    let daysNeeded = calculateAdditionalDays(denominator, numerator);
 
-        // Calculate how many more days are needed
-        let additionalDays = (requiredAttendance - presentDays) / 0.25;
-
-        // If additional days are less than or equal to zero, return 0 (no more days needed)
-        if (additionalDays <= 0) {
-            return 0;
-        }
-
-        return Math.ceil(additionalDays);  // Round up to the nearest whole number
-    }
-
-    let totalDays = denominator;
-    let presentDays = numerator;
-    let daysNeeded = calculateAdditionalDays(totalDays, presentDays);
-
-    //   console.log("Days needed to reach 75% attendance:", daysNeeded);
-
-    if (document.querySelector(`#ContentPlaceHolder1_gv_lbltotalclass_${count}`).innerHTML == "")
-        break;
-    else {
-        if (daysNeeded > 40)
-            replaceInputWithP(`ContentPlaceHolder1_gv_imgbtnfeedback_${count}`, "-");
-        else if (daysNeeded) {
-            replaceInputWithP(`ContentPlaceHolder1_gv_imgbtnfeedback_${count}`, daysNeeded);
-            styleAllParagraphs();
-        }
-        else {
-            replaceInputWithP(`ContentPlaceHolder1_gv_imgbtnfeedback_${count}`, "Already Crossed✅");
-        }
+    if (daysNeeded > 40) {
+        replaceInputWithP(`ContentPlaceHolder1_gv_imgbtnfeedback_${count}`, "-");
+        temp = 0;
+    } else if (daysNeeded > 0) {
+        temp = 0;
+        replaceInputWithP(`ContentPlaceHolder1_gv_imgbtnfeedback_${count}`, daysNeeded);
+        styleAllParagraphs();
+    } else {
+        replaceInputWithP(`ContentPlaceHolder1_gv_imgbtnfeedback_${count}`, "Already Crossed✅");
     }
     count++;
 }
 
+// Fix styling function
 
 
-
-// Create Custom Element - Function
-function Create_Custom_Element(tag, attr_tag, attr_name, value) {
-    const custom_element = document.createElement(tag)
-    custom_element.setAttribute(attr_tag, attr_name)
-    custom_element.innerHTML = value
-    document.body.append(custom_element)
+// Handling select element changes
+let flag = 0;
+function trigger(selectTag) {
+    if (selectTag) {
+        selectTag.removeAttribute("disabled");
+        console.log(`Select tag updated!`);
+        flag = 1;
+    }
 }
 
+let selectTag = document.querySelector("select.aspNetDisabled");
+if (selectTag) {
+    trigger(selectTag);
+}
 
-//  https://online.nitjsr.ac.in/endsem/StudentAttendance/ClassAttendance.aspx
+// Interval to check for updates
+const intervalId = setInterval(() => {
+    const selectTag = document.querySelector("select.aspNetDisabled");
+    if (selectTag && selectTag.hasAttribute("disabled")) {
+        trigger(selectTag);
+    }
+
+    let legend = document.querySelector("legend");
+    if (flag === 1 && legend) {
+        legend.innerHTML = "Class Attendance <span style='color: red;'>(Data fetched successfully!)</span>";
+        if (typeof calculateSurplusClasses === "function") calculateSurplusClasses();
+        flag = 0;
+    }
+}, 500);
