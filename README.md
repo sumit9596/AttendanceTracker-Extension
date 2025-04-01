@@ -18,6 +18,10 @@ A browser extension designed to help students track their attendance and calcula
 
 4. The extension will now be active in your browser.
 
+Extra Tip : 
+
+  ☺️ You can also use in mobile phone just install kivi Browser. and add some few setup ( you can search in youtube " How to add extension in Kivi Browser." )
+   
 ---
 
 ## How to Use?
